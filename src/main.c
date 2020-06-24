@@ -68,6 +68,7 @@ int fork_pipes(int n, simple_command_t *cmd) {
 	close(fd[1]);
 	in = fd[0];
     }
+    close(fd[1]);
     if(in != 0) dup2(in,0);
     if((pid = fork()) == 0) {
        execvp(cmd[i].argv[0],(char* const*)cmd[i].argv);
