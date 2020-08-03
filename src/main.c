@@ -39,6 +39,11 @@ char* read_cmdline() {
       return cmd_line;
 }
 
+void run_cmd(char** argv) {
+     if(strcmp(argv[0],"exit")==0) exit(0);
+     execvp(argv[0], (char* const*)argv);
+}
+
 pid_t spawn_proc(int in, int out, simple_command_t* cmd) {
     pid_t pid;
 
@@ -51,11 +56,12 @@ pid_t spawn_proc(int in, int out, simple_command_t* cmd) {
 	   dup2(out, 1);
 	   close(out);
 	}
-	return execvp(cmd->argv[0], (char* const*)cmd->argv);
+	run_cmd(cmd->argv);
      }
 }
 
 int fork_pipes(int n, simple_command_t *cmd) {
+    if(n==1) run_cmd(cmd[0].argv);
     int tmpin = dup(0);
     int tmpout = dup(1);
     int i;
@@ -71,7 +77,7 @@ int fork_pipes(int n, simple_command_t *cmd) {
     close(fd[1]);
     if(in != 0) dup2(in,0);
     if((pid = fork()) == 0) {
-       execvp(cmd[i].argv[0],(char* const*)cmd[i].argv);
+       run_cmd(cmd[i].argv);
     } else {
        int retval;	
        waitpid(pid,&retval,0);
